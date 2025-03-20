@@ -1,5 +1,5 @@
-from file_system.directory import Directory
-from file_system.file import File
+from ..file_system.directory import Directory
+from ..file_system.file import File
 
 
 class FileSystem:
