@@ -104,9 +104,8 @@ class FileSystem:
             except DuplicateNameError:
                 existing_file = parent.find_child(file_name)
                 if isinstance(existing_file, File):
-                    parent.size -= len(existing_file)
+                    parent.update_size(-existing_file.size)
                     existing_file.write(content)
-                    parent.size += len(existing_file)
                 else:
                     self.current.raise_error(DuplicateNameError, name=file_name, directory=parent.name)
     

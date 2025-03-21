@@ -1,5 +1,4 @@
 from datetime import datetime
-# from src.file_system.linked_list.linked_list import LinkedList
 from src.file_system.constants import PATH_DELIMITER
 from src.file_system.validation import validate_name
 from src.file_system.linked_list import LinkedList
@@ -25,8 +24,24 @@ class FSNode:
     def __str__(self):
         return self.name
 
+    def __getattr__(self, name):
+        """
+        Fallback for missing attributes.
+
+        Args:
+            name (str): The name of the attribute being accessed.
+
+        Returns:
+            Any: The value of the attribute, or None if it's 'parent'.
+        """
+        if name == 'parent':
+            return None
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+
     def modify(self):
         self.mtime = datetime.now()
+        if hasattr(self, 'parent') and hasattr(self.parent, 'update_size'):
+            self.parent.update_size(getattr(self.size))
 
     def validate(self, name: str):
         """
@@ -46,20 +61,6 @@ class FSNode:
         """        
         self.validate(new_name)
         self.name = new_name
-
-    def __getattr__(self, name):
-        """
-        Fallback for missing attributes.
-
-        Args:
-            name (str): The name of the attribute being accessed.
-
-        Returns:
-            Any: The value of the attribute, or None if it's 'parent'.
-        """
-        if name == 'parent':
-            return None
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
     def get_absolute_path(self):
         path    = LinkedList(self.name)

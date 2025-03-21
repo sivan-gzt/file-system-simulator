@@ -43,5 +43,29 @@ A Python-based file system simulator that supports basic operations like creatin
    python3 .
    ```
 
+## Running Tests
+To ensure the simulator works as expected, you can run the test suite using Python's built-in `unittest` module:
+
+1. Navigate to the `tests` directory:
+   ```bash
+   cd file-system-simulator/tests
+   ```
+2. Run all tests:
+   ```bash
+   python -m unittest discover
+   ```
+   On macOS, you may need to use `python3`:
+   ```bash
+   python3 -m unittest discover
+   ```
+
+3. Alternatively, run a specific test file:
+   ```bash
+   python -m unittest test_directory.py
+   ```
+   Or for macOS:
+   ```bash
+   python3 -m unittest test_directory.py
+   ```
 
 

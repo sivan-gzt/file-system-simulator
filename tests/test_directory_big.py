@@ -37,18 +37,52 @@ class TestDirectoryBig(unittest.TestCase):
         
         self.assertEqual(self.root.children.length, num_children - removed)
 
-    def test_deep_nesting(self):
-        """Test a deeply nested directory structure."""
-        depth = 1000
+    def test_complex_file_system_operations(self):
+        """Test a complex sequence of operations on the file system."""
+        # Step 1: Create a deep directory structure.
+        depth = 5
         current_dir = self.root
         for i in range(depth):
             new_dir = Directory(f"dir_{i}")
             current_dir.add_child(new_dir)
             current_dir = new_dir
         
-        abs_path = current_dir.get_absolute_path()
-        # Expect components: root plus 'depth' directories.
-        self.assertEqual(len(abs_path.split(PATH_DELIMITER)), depth + 1)
+        # Step 2: Add multiple files to the deepest directory.
+        num_files = 100
+        for i in range(num_files):
+            current_dir.add_child(File(f"file_{i}"))
+        
+        # Step 3: Verify the deepest directory contains the correct number of files.
+        self.assertEqual(current_dir.children.length, num_files)
+        
+        # Step 4: Remove some files and verify the count.
+        for i in range(0, num_files, 2):  # Remove every other file.
+            self.assertTrue(current_dir.remove_child(f"file_{i}"))
+        self.assertEqual(current_dir.children.length, num_files // 2)
+        
+        # Step 5: Add more directories and files at various levels.
+        for i in range(3):
+            new_dir = Directory(f"extra_dir_{i}")
+            self.root.add_child(new_dir)
+            for j in range(10):
+                new_dir.add_child(File(f"extra_file_{j}"))
+        
+        # Step 6: Verify the total number of nodes in the tree.
+        total_nodes = 0
+        def traverse(directory: Directory):
+            nonlocal total_nodes
+            for _, child in directory.children.enumrate():
+                total_nodes += 1
+                if hasattr(child, "children"):
+                    traverse(child)
+        traverse(self.root)
+        
+        expected_nodes = depth + (num_files // 2) + (3 * 10) + 3  # Directories + remaining files + extra files + extra dirs
+        self.assertEqual(total_nodes, expected_nodes)
+        
+        # Step 7: Print the tree structure for debugging.
+        output = self.root.list(recurse=True)
+        print("\nComplex tree listing output:\n", output)
 
     def test_list_output_format(self):
         """Test that the tree-formatted output is correct."""

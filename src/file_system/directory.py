@@ -29,8 +29,10 @@ class Directory(FSNode):
         Updates the size of the directory
         """        
         self.size += delta
-        if self.parent:
-            self.parent.update_size(delta)
+        parent     = self.parent
+        while parent is not None:
+            parent.update_size(delta)
+            parent = parent.parent
     
     def find_child(self, name: str) -> FSNode | None:
         if name == '':
@@ -40,7 +42,7 @@ class Directory(FSNode):
             return None
         return child.data
 
-    def add_child(self, child: FSNode, overwrite: bool = False) -> None:
+    def add_child(self, node: FSNode, overwrite: bool = False) -> None:
         """
         Adds a child node to the directory.
 
@@ -51,25 +53,27 @@ class Directory(FSNode):
         Raises:
             DuplicateNameError: If a child with the same name already exists and overwrite is False.
         """
-        existing_child = self.find_child(child.name)
-        if existing_child:
+        existing_child = self.find_child(node.name)
+        if existing_child is not None:
             if overwrite:
-                self.update_size(-existing_child.size)  # Subtract the size of the existing child
                 self.children.remove(existing_child)
+                self.update_size(-existing_child.size)  # Subtract the size of the existing child
             else:
-                existing_child.parent.raise_error(DuplicateNameError, name=child.name, directory=self.name)
+                parent = existing_child.parent
+                self.raise_error(DuplicateNameError, name=node.name, directory=self.name)
         self.count += 1
-        child.parent = self
-        self.children.append(child)
-        self.update_size(child.size)  # Add the size of the new child
-        
-    
-    def remove_child(self, name: str) -> None:
+        node.parent = self
+        self.children.append(node)
+        self.update_size(node.size)  # Add the size of the new child
+    def remove_child(self, name: str) -> bool:
         """
         Removes a child node by name.
 
         Args:
             name (str): The name of the child to remove.
+
+        Returns:
+            bool: True if the child was successfully removed.
 
         Raises:
             NotFoundError: If the child does not exist.
@@ -81,6 +85,11 @@ class Directory(FSNode):
         self.children.remove(child)
         self.count -= 1
         self.update_size(-child.size)  # Subtract the size of the removed child
+        return True
+        self.children.remove(child)
+        self.count -= 1
+        self.update_size(-child.size)  # Subtract the size of the removed child
+        return True
 
     def list(self, prefix: str = "", is_last: bool = True, recurse: bool = False) -> str:
         """
