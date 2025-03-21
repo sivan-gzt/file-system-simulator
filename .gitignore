@@ -1,2 +1,39 @@
-__pycache__/\n*.pyc\n*.pyo
-__pycache__
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environment directories
+venv/
+env/
+
+# Ignore VSCode settings and workspace files
+.vscode/
+settings.json
+launch.json
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Ignore compiled files
+*.so
+*.dll
+*.exe
+
+# Ignore test coverage reports
+htmlcov/
+.coverage
+*.cover
+*.coverage.*
+
+# Ignore build artifacts
+build/
+dist/
+*.egg-info/
