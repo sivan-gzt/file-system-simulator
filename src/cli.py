@@ -4,7 +4,16 @@ from src.file_system.filesystem import FileSystem
 from src.file_system.exceptions import FileSystemError
 from src.file_system.constants import COLOR_RED, COLOR_RESET
 
-def parse_arguments():
+def parse_arguments(command: str = None):
+    """
+    Parses CLI arguments using argparse.
+
+    Args:
+        command (str, optional): The command string to parse. If None, uses sys.argv.
+
+    Returns:
+        Namespace: Parsed arguments.
+    """
     parser = ArgumentParser(description="File System CLI")
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
 
@@ -76,7 +85,12 @@ def parse_arguments():
         help='Name of the file or directory to get the size of'
     )
 
-    return parser
+    if command is not None:
+        args = parser.parse_args(shlex_split(command))  # Use shlex.split for consistent parsing
+    else:
+        args = parser.parse_args()  # Use sys.argv for default behavior
+
+    return args
 
 def validate_touch_args(args):
     """
@@ -103,7 +117,8 @@ def execute_command(fs: FileSystem, args):
             fs.cd(args.directory)  # No output, just execute the command
 
         elif args.command == 'read':
-            print(fs.read(args.filename))  # Output the file content
+            content, _ = fs.read(args.filename)
+            return content
 
         elif args.command == 'mkdir':
             for directory in args.directories:
@@ -112,7 +127,8 @@ def execute_command(fs: FileSystem, args):
         elif args.command == 'touch':
             if len(args.files) > 1 and args.content:
                 fs.root.raise_error(FileSystemError("The --content option can only be used with a single file."))
-            fs.touch(*args.files, content=args.content if len(args.files) == 1 else '')
+            for file in args.files:
+                fs.touch(file, content=args.content)
 
         elif args.command == 'write':
             fs.write(args.file, content=args.content, overwrite=args.overwrite)
@@ -147,8 +163,7 @@ def interactive_mode(fs: FileSystem, parser: ArgumentParser):
             continue
 
         try:
-            # Use shlex.split() to correctly handle quoted strings
-            args = parser.parse_args(shlex_split(command))
+            args = parse_arguments(command)  # Use the same parsing logic as non-interactive mode
             if not execute_command(fs, args):
                 print(f"Unknown or incomplete command '{command}'")
         except SystemExit:
@@ -160,15 +175,14 @@ def interactive_mode(fs: FileSystem, parser: ArgumentParser):
 
 def main():
     fs = FileSystem()
-    parser = parse_arguments()
-    args = parser.parse_args()
+    args = parse_arguments()
 
     FileSystemError.__str__ = lambda self: f"{COLOR_RED}[{self.__class__.__name__}] {self.reason}{COLOR_RESET}"
 
     if args.command:
         execute_command(fs, args)
     else:
-        interactive_mode(fs, parser)
+        interactive_mode(fs, parse_arguments)
 
 if __name__ == "__main__":
     main()

@@ -48,9 +48,6 @@ class LinkedList:
     def __len__(self):
         return self.length
     
-    def __bfs(self):
-        pass
-
     def __iter__(self):
         current = self.head
         while current:

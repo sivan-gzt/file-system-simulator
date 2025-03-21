@@ -15,6 +15,12 @@ class FileSystem:
         self.root = Directory()
         self.current: Directory = self.root
 
+    def get_size(self) -> int:
+        """
+        Returns the total size of the file system.
+        """
+        return self.root.size
+
     def ls(self, recurse: bool = False) -> str:
         """
         Lists the contents of the current directory.
@@ -67,7 +73,7 @@ class FileSystem:
             path (str): The path to the file.
 
         Returns:
-            str: The content of the file, or None if the file does not exist.
+            str: The content of the file.
 
         Raises:
             NotFoundError: If the file does not exist.
@@ -75,8 +81,8 @@ class FileSystem:
         """
         target = PathResolver.resolve(self, path, must_exist=True)
         if not isinstance(target, File):
-            target.raise_error(FileSystemError, f"Cannot read: '{path}' is not a valid file.")
-        return target._content
+            self.current.raise_error(FileSystemError, f"Cannot read: '{path}' is not a valid file.")
+        return target.content
     
     def touch(self, *paths: str, content: str = '') -> None:
         """
@@ -86,8 +92,6 @@ class FileSystem:
         Args:
             *paths (str): One or more file paths to create. Paths can be nested (e.g., "a/b/c.txt").
             content (str, optional): The content to write to the file. Defaults to an empty string.
-            append (bool): If True, appends content to an existing file. Defaults to False.
-            overwrite (bool): If True, overwrites content of an existing file. Defaults to False.
 
         Raises:
             NotADirectoryError: If a path component is not a directory.
@@ -99,15 +103,15 @@ class FileSystem:
             parent, file_name = PathResolver.resolve_parent(self, path)
 
             # Check if the file already exists
-            try:
-                parent.add_child(File(name=file_name, content=content))
-            except DuplicateNameError:
-                existing_file = parent.find_child(file_name)
+            existing_file = parent.find_child(file_name)
+            if existing_file:
                 if isinstance(existing_file, File):
-                    parent.update_size(-existing_file.size)
-                    existing_file.write(content)
+                    existing_file.write(content)  # Overwrite content
                 else:
                     self.current.raise_error(DuplicateNameError, name=file_name, directory=parent.name)
+            else:
+                new_file = File(name=file_name, content=content)
+                parent.add_child(new_file)  # Automatically updates size
     
     def pwd(self, recurse) -> str:
         return self.current.get_absolute_path() if recurse else str(self.current)
@@ -156,14 +160,18 @@ class FileSystem:
                 # Recursively delete all children
                 while len(target.children) > 0:
                     child = target.children.head.data  # Get the first child
-                    target.remove_child(child.name)  # Remove the child (recursive call)
+                    target.remove_child(child.name)  # Remove the child
                 # Remove the directory itself
-                target.parent.remove_child(target.name)
+                if target.parent:
+                    target.parent.remove_child(target.name)
             else:
-                target.raise_error(FileSystemError, f"Cannot delete: '{path}' is a directory. Use -R to delete directories.")
-        else:
+                self.current.raise_error(FileSystemError, f"Cannot delete: '{path}' is a directory. Use -R to delete directories.")
+        elif isinstance(target, File):
             # If it's a file, simply remove it
-            target.parent.remove_child(target.name)
+            if target.parent:
+                target.parent.remove_child(target.name)
+        else:
+            self.current.raise_error(FileSystemError, f"Cannot delete: '{path}' is not a valid file or directory.")
     
     def cd(self, path: str) -> bool:
         """
@@ -185,7 +193,7 @@ class FileSystem:
         self.current = target
         return True
     
-    def size(self, path: str):
+    def size(self, path: str) -> int:
         """
         Get the size of a file or directory.
 

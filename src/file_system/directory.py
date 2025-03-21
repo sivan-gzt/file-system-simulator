@@ -12,33 +12,18 @@ from src.file_system.exceptions import (
     NotFoundError
 )
 from src.file_system.node import FSNode
-from src.file_system.linked_list import LinkedList, Stack  # Import Stack
+from src.file_system.file import File
+from src.file_system.linked_list import LinkedList
 
 class Directory(FSNode):
-    def __init__(self, name: str=ROOT): 
+    def __init__(self, name: str = ROOT): 
         super().__init__(name)
         self.children = LinkedList()
-        self.size     = 0
-        self.count    = 0
-        
+        self.count = 0  # Track the number of children
+
     def __str__(self):
         return (f"{PREFIX_DIRECTORY} " if self.parent else "") + super().__str__()
-    
-    def update_size(self, delta: int):
-        """
-        Updates the size of the directory and propagates the change up the hierarchy.
-        """
-        self.size += delta
-        stack = Stack()  # Use a stack to track parents
-        parent = self.parent
 
-        while parent is not None:
-            if parent in stack:  # Prevent double updates
-                continue
-            stack.push(parent)
-            parent.size += delta
-            parent = parent.parent
-    
     def find_child(self, name: str) -> FSNode | None:
         if name == '':
             return self
@@ -61,20 +46,22 @@ class Directory(FSNode):
         existing_child = self.find_child(node.name)
         if existing_child is not None:
             if overwrite:
-                # Remove the existing child and update size
-                self.children.remove(existing_child)
-                self.update_size(-existing_child.size)
-                self.count -= 1
+                if isinstance(existing_child, File) and isinstance(node, File):
+                    existing_child.write(node.content)  # Overwrite content
+                    self.modify()  # Update the modification time
+                    return
+                else:
+                    self.children.remove(existing_child)
+                    self.update_size(-existing_child.size)  # Trigger size propagation
+                    self.count -= 1
             else:
-                # Raise an error if overwrite is False
                 self.raise_error(DuplicateNameError, name=node.name, directory=self.name)
 
-        # Add the new child
         self.children.append(node)
         node.parent = self
-        self.update_size(node.size)
+        self.update_size(node.size)  # Trigger size propagation
         self.count += 1
-        self.modify()  # Update the modification time
+        self.modify()
 
     def remove_child(self, name: str) -> bool:
         """
@@ -94,39 +81,39 @@ class Directory(FSNode):
             self.raise_error(NotFoundError, name=name, directory=self.name)
 
         self.children.remove(child)
+        self.update_size(-child.size)  # Trigger size propagation
         self.count -= 1
-        self.update_size(-child.size)  # Subtract the size of the removed child
-        self.modify()  # Update the modification time
+        self.modify()
         return True
 
     def list(self, prefix: str = "", is_last: bool = True, recurse: bool = False) -> str:
         """
-        Produces a tree-formatted directory
+        Produces a tree-formatted directory using a recursive approach.
         """
-        # for root directory no prefix is used
+        # For root directory, no prefix is used
         buffer = f"{str(self)}{PATH_DELIMITER}\n"
         if self.parent is None:
-            child_prefix = ""  # no indentation for the first level under root
+            child_prefix = ""  # No indentation for the first level under root
         else:
-            marker       = TREE_LAST if is_last else TREE_BRANCH
-            buffer       = f"{prefix}{marker}" + buffer
+            marker = TREE_LAST if is_last else TREE_BRANCH
+            buffer = f"{prefix}{marker}" + buffer
             child_prefix = prefix + (TREE_SPACE if is_last else TREE_VERTICAL)
         
         for is_last, child in self.children.enumerate():
-            # if at root don't add extra indent to children
+            # If at root, don't add extra indent to children
             new_prefix = child_prefix if self.parent is not None else ""
             
             if hasattr(child, "list") and recurse:
                 buffer += child.list(prefix=new_prefix, is_last=is_last, recurse=recurse)
             else:
-                marker  = TREE_LAST if is_last else TREE_BRANCH
+                marker = TREE_LAST if is_last else TREE_BRANCH
                 buffer += f"{new_prefix}{marker}{str(child)}{PATH_DELIMITER if isinstance(child, Directory) else ''}\n"
         
         return buffer
 
     def get_absolute_path(self) -> str:
         """
-        returns the absolute path of the directory
+        Returns the absolute path of the directory.
 
         Returns:
             str: The absolute path of the directory.

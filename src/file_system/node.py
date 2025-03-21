@@ -13,15 +13,31 @@ class FSNode:
 
         Args:
             name (str): name of entity, validated by validate_name()
-            parent (FSNode, optional): Parent of entity. Defaults to None.
         """            
         self.entity_type = self.__class__.__name__
         self.validate(name)
-        self.name   = name
-        self.ctime  = datetime.now()
-        self.mtime  = self.ctime
+        self.name = name
+        self.ctime = datetime.now()
+        self.mtime = self.ctime
         self.parent = None
-        
+        self._size = 0  # Initialize size at the node level
+
+    @property
+    def size(self) -> int:
+        """
+        Returns the size of the node.
+        """
+        return self._size
+
+    def update_size(self, delta: int):
+        """
+        Updates the size of the node and propagates the change up the hierarchy iteratively.
+        """
+        current = self
+        while current is not None:
+            current._size += delta
+            current = current.parent
+
     def __str__(self):
         return self.name
 
@@ -33,7 +49,7 @@ class FSNode:
 
     def modify(self):
         """
-        Updates the modification time (mtime) of the node and propagates changes to the parent.
+        Updates the modification time (mtime) of the node.
         """
         self.mtime = datetime.now()  # Update the modification time
 
@@ -57,7 +73,7 @@ class FSNode:
         self.name = new_name
 
     def get_absolute_path(self):
-        path    = LinkedList(self.name)
+        path = LinkedList(self.name)
         current = self.parent
         while current:
             path.append(current.name)

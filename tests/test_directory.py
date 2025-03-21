@@ -51,7 +51,39 @@ class TestDirectory(unittest.TestCase):
         self.assertIsNone(self.directory.find_child('hello'))
         self.assertEqual(self.directory.count, 2)
 
+    def test_overwrite_file_in_directory(self):
+        """Test overwriting a file in a directory and updating size."""
+        # Initial setup
+        self.directory.add_child(File('test_file', 'initial content'))
+        initial_size = self.directory.size
+
+        # Overwrite the file with new content
+        self.directory.add_child(File('test_file', 'new content'), overwrite=True)
+        self.assertEqual(self.directory.find_child('test_file').content, 'new content')
+
+        # Verify size update
+        new_size = self.directory.size
+        self.assertNotEqual(initial_size, new_size)
+        self.assertEqual(new_size, initial_size - len('initial content') + len('new content'))
+
+    def test_overwrite_file_with_same_content(self):
+        """Test overwriting a file with the same content does not change size."""
+        # Initial setup
+        self.directory.add_child(File('test_file', 'same content'))
+        initial_size = self.directory.size
+
+        # Overwrite the file with the same content
+        self.directory.add_child(File('test_file', 'same content'), overwrite=True)
+        self.assertEqual(self.directory.find_child('test_file').content, 'same content')
+
+        # Verify size remains unchanged
+        self.assertEqual(self.directory.size, initial_size)
+
     def tearDown(self):
         """Clean up after tests."""
         print("Finished\n" + self.directory.list(recurse=True))
         super().tearDown()
+
+
+if __name__ == "__main__":
+    unittest.main()

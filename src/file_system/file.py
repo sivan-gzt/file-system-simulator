@@ -4,9 +4,10 @@ from src.file_system.node import FSNode
 
 class File(FSNode):
     
-    def __init__(self, name: str, content: str=''):
+    def __init__(self, name: str, content: str = ''):
         super().__init__(name)
         self._content = content  # Privatize the content attribute
+        self.update_size(len(content))  # Initialize size based on content
         
     @property
     def size(self) -> int:
@@ -36,25 +37,23 @@ class File(FSNode):
         """
         if overwrite:
             size_difference = len(content) - len(self._content)  # Calculate size difference before overwriting
-            self._content = content
+            self._content = content  # Replace the content entirely
         else:
             size_difference = len(content)  # Appending adds the full length of the new content
-            self._content += content
+            self._content += content  # Append the new content
 
-        if self.parent:
-            self.parent.update_size(size_difference)  # Apply the correct size difference
+        self.update_size(size_difference)  # Trigger size propagation
         self.modify()  # Update the modification time
     
     def append(self, data: str):
         """
-        Appends data to the file. Updates modification time.
+        Appends data to the file.
         """
         self.write(data, overwrite=False)
-        self.modify()  # Update the modification time
 
     def read(self) -> tuple[str, int]:
         """
-        Reads and returns file content
+        Reads and returns file content.
 
         Returns:
             tuple[str, int]: The content and its size.
