@@ -14,19 +14,6 @@ from src.file_system.exceptions import (
 from src.file_system.node import FSNode
 from src.file_system.linked_list import LinkedList
 
-# from src.file_system.exceptions import DuplicateNameError
-# from src.file_system.constants import (
-#     PATH_DELIMITER,
-#     PREFIX_DIRECTORY,
-#     ROOT,
-#     TREE_BRANCH,
-#     TREE_LAST,
-#     TREE_SPACE,
-#     TREE_VERTICAL
-# )
-# from src.file_system.node import FSNode
-# from src.file_system.linked_list.linked_list import LinkedList
-
 class Directory(FSNode):
     def __init__(self, name: str=ROOT): 
         super().__init__(name)
@@ -116,7 +103,7 @@ class Directory(FSNode):
                 buffer += child.list(prefix=new_prefix, is_last=is_last, recurse=recurse)
             else:
                 marker  = TREE_LAST if is_last else TREE_BRANCH
-                buffer += f"{new_prefix}{marker}{str(child)}\n"
+                buffer += f"{new_prefix}{marker}{str(child)}{PATH_DELIMITER}\n"
         
         return buffer
 
