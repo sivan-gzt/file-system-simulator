@@ -9,14 +9,14 @@ class TestFile(unittest.TestCase):
         """Test creating a file with a valid name"""
         file = File("test_file")
         self.assertEqual(file.name, "test_file")
-        self.assertEqual(file.content, "")
+        self.assertEqual(file._content, "")
         self.assertEqual(file.size, 0)
 
     def test_write_content(self):
         """Test writing content to the file"""
         file = File("test_file")
         file.write("Hello")
-        self.assertEqual(file.content, "Hello")
+        self.assertEqual(file._content, "Hello")
         self.assertEqual(file.size, 5)
 
     def test_append_content(self):
@@ -24,7 +24,7 @@ class TestFile(unittest.TestCase):
         file = File("test_file")
         file.write("Hello")
         file.append(" World")
-        self.assertEqual(file.content, "Hello World")
+        self.assertEqual(file._content, "Hello World")
         self.assertEqual(file.size, 11)
 
     def test_mtime_updates_on_write(self):

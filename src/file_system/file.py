@@ -1,23 +1,28 @@
-from __future__ import annotations
 from datetime import datetime
-from .node import FSNode
+from src.file_system.constants import PREFIX_FILE
+from src.file_system.node import FSNode
 
 class File(FSNode):
     
-    def __init__(self, name: str, parent=None, content: str=''):
-        super().__init__(name, parent)
-        self.content = content
+    def __init__(self, name: str, content: str=''):
+        super().__init__(name)
+        self._content = content
         self.size = len(content)
         self.rtime = None
         
     def __len__(self):
         return self.size
     
-    # def __str__(self):
-    #     return super().__str__() + f" ({self.entity_type})"
-
+    def __str__(self):
+        return f"{PREFIX_FILE} " + super().__str__()
+    
+    def __getattr__(self, name):
+        if name == 'content':
+            return ''
+        return super().__getattr__(name)
+    
     def __update_content(self, data: str):
-        self.content = data
+        self._content = data
         self.size = len(data)
         super().modify()
         
@@ -25,7 +30,7 @@ class File(FSNode):
         self.__update_content(data)
     
     def append(self, data: str):
-        self.__update_content(self.content + data)
+        self.__update_content(self._content + data)
 
     def read(self) -> tuple[str, int]:
         """
@@ -35,6 +40,6 @@ class File(FSNode):
             tuple[str, int]: _description_
         """        
         self.rtime = datetime.now()
-        return self.content, len(self)
+        return self._content, len(self)
     
     
