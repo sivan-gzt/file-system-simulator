@@ -1,8 +1,8 @@
 from argparse import ArgumentError, ArgumentParser
-import shlex
-from src.file_system.exceptions import FileSystemError
-from src.file_system.constants import COLOR_RED, COLOR_RESET
-from src.file_system.filesystem import FileSystem
+from shlex import split as shlex_split
+from .file_system.exceptions import FileSystemError
+from .file_system.constants import COLOR_RED, COLOR_RESET
+from .file_system.filesystem import FileSystem
 
 def parse_arguments():
     parser = ArgumentParser(description="File System CLI")
@@ -148,7 +148,7 @@ def interactive_mode(fs: FileSystem, parser: ArgumentParser):
 
         try:
             # Use shlex.split() to correctly handle quoted strings
-            args = parser.parse_args(shlex.split(command))
+            args = parser.parse_args(shlex_split(command))
             if not execute_command(fs, args):
                 print(f"Unknown or incomplete command '{command}'")
         except SystemExit:
