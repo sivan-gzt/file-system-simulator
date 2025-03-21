@@ -52,7 +52,7 @@ class Directory(FSNode):
         Adds a child node to the directory and updates modification time.
 
         Args:
-            child (FSNode): The child node to add.
+            node (FSNode): The child node to add.
             overwrite (bool): If True, overwrites an existing child with the same name.
 
         Raises:
@@ -61,15 +61,19 @@ class Directory(FSNode):
         existing_child = self.find_child(node.name)
         if existing_child is not None:
             if overwrite:
+                # Remove the existing child and update size
                 self.children.remove(existing_child)
-                self.update_size(-existing_child.size)  # Subtract the size of the existing child
+                self.update_size(-existing_child.size)
+                self.count -= 1
             else:
-                parent = existing_child.parent
+                # Raise an error if overwrite is False
                 self.raise_error(DuplicateNameError, name=node.name, directory=self.name)
-        self.count += 1
-        node.parent = self
+
+        # Add the new child
         self.children.append(node)
-        self.update_size(node.size)  # Add the size of the new child
+        node.parent = self
+        self.update_size(node.size)
+        self.count += 1
         self.modify()  # Update the modification time
 
     def remove_child(self, name: str) -> bool:

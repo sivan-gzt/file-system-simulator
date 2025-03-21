@@ -35,11 +35,14 @@ class File(FSNode):
         Writes content to the file. Updates size dynamically and modification time.
         """
         if overwrite:
+            size_difference = len(content) - len(self._content)  # Calculate size difference before overwriting
             self._content = content
         else:
+            size_difference = len(content)  # Appending adds the full length of the new content
             self._content += content
+
         if self.parent:
-            self.parent.update_size(len(content) if not overwrite else len(content) - len(self._content))
+            self.parent.update_size(size_difference)  # Apply the correct size difference
         self.modify()  # Update the modification time
     
     def append(self, data: str):
