@@ -75,7 +75,7 @@ class Directory(FSNode):
             NotFoundError: If the child does not exist.
         """
         child = self.find_child(name)
-        if not child:
+        if child is None:
             self.raise_error(NotFoundError, name=name, directory=self.name)
 
         self.children.remove(child)
@@ -103,7 +103,7 @@ class Directory(FSNode):
                 buffer += child.list(prefix=new_prefix, is_last=is_last, recurse=recurse)
             else:
                 marker  = TREE_LAST if is_last else TREE_BRANCH
-                buffer += f"{new_prefix}{marker}{str(child)}{PATH_DELIMITER}\n"
+                buffer += f"{new_prefix}{marker}{str(child)}{PATH_DELIMITER if isinstance(child, Directory) else ''}\n"
         
         return buffer
 
