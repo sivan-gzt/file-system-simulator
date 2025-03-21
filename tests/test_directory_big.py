@@ -71,7 +71,7 @@ class TestDirectoryBig(unittest.TestCase):
         total_nodes = 0
         def traverse(directory: Directory):
             nonlocal total_nodes
-            for _, child in directory.children.enumrate():
+            for _, child in directory.children.enumerate():
                 total_nodes += 1
                 if hasattr(child, "children"):
                     traverse(child)
@@ -135,7 +135,7 @@ class TestDirectoryBig(unittest.TestCase):
         total_nodes = 0
         def traverse(directory: Directory):
             nonlocal total_nodes
-            for _, child in directory.children.enumrate():
+            for _, child in directory.children.enumerate():
                 total_nodes += 1
                 if hasattr(child, "children"):
                     traverse(child)

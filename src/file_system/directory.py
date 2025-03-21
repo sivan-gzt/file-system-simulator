@@ -12,7 +12,7 @@ from src.file_system.exceptions import (
     NotFoundError
 )
 from src.file_system.node import FSNode
-from src.file_system.linked_list import LinkedList
+from src.file_system.linked_list import LinkedList, Stack  # Import Stack
 
 class Directory(FSNode):
     def __init__(self, name: str=ROOT): 
@@ -26,12 +26,17 @@ class Directory(FSNode):
     
     def update_size(self, delta: int):
         """
-        Updates the size of the directory
-        """        
+        Updates the size of the directory and propagates the change up the hierarchy.
+        """
         self.size += delta
-        parent     = self.parent
+        stack = Stack()  # Use a stack to track parents
+        parent = self.parent
+
         while parent is not None:
-            parent.update_size(delta)
+            if parent in stack:  # Prevent double updates
+                continue
+            stack.push(parent)
+            parent.size += delta
             parent = parent.parent
     
     def find_child(self, name: str) -> FSNode | None:
@@ -44,7 +49,7 @@ class Directory(FSNode):
 
     def add_child(self, node: FSNode, overwrite: bool = False) -> None:
         """
-        Adds a child node to the directory.
+        Adds a child node to the directory and updates modification time.
 
         Args:
             child (FSNode): The child node to add.
@@ -65,9 +70,11 @@ class Directory(FSNode):
         node.parent = self
         self.children.append(node)
         self.update_size(node.size)  # Add the size of the new child
+        self.modify()  # Update the modification time
+
     def remove_child(self, name: str) -> bool:
         """
-        Removes a child node by name.
+        Removes a child node by name and updates modification time.
 
         Args:
             name (str): The name of the child to remove.
@@ -85,10 +92,7 @@ class Directory(FSNode):
         self.children.remove(child)
         self.count -= 1
         self.update_size(-child.size)  # Subtract the size of the removed child
-        return True
-        self.children.remove(child)
-        self.count -= 1
-        self.update_size(-child.size)  # Subtract the size of the removed child
+        self.modify()  # Update the modification time
         return True
 
     def list(self, prefix: str = "", is_last: bool = True, recurse: bool = False) -> str:
@@ -104,7 +108,7 @@ class Directory(FSNode):
             buffer       = f"{prefix}{marker}" + buffer
             child_prefix = prefix + (TREE_SPACE if is_last else TREE_VERTICAL)
         
-        for is_last, child in self.children.enumrate():
+        for is_last, child in self.children.enumerate():
             # if at root don't add extra indent to children
             new_prefix = child_prefix if self.parent is not None else ""
             

@@ -63,7 +63,7 @@ class LinkedList:
             yield current.data
             current = current.prev
 
-    def enumrate(self):
+    def enumerate(self):
         """
         Special enumration method for linked list
 
@@ -166,7 +166,7 @@ class Stack(LinkedList):
     def pop(self):
         return self.remove(self.tail)
     
-    def add(self, *data: any):
+    def push(self, *data: any):
         return self.append(*data)
 
 class Queue(LinkedList):

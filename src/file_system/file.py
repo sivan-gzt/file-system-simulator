@@ -6,13 +6,22 @@ class File(FSNode):
     
     def __init__(self, name: str, content: str=''):
         super().__init__(name)
-        self._content = content
-        self.size = len(content)
-        self.rtime = None
+        self._content = content  # Privatize the content attribute
         
-    def __len__(self):
-        return self.size
+    @property
+    def size(self) -> int:
+        """
+        Returns the size of the file based on its content.
+        """
+        return len(self._content)
     
+    @property
+    def content(self) -> str:
+        """
+        Provides read-only access to the file's content.
+        """
+        return self._content
+
     def __str__(self):
         return f"{PREFIX_FILE} " + super().__str__()
     
@@ -21,25 +30,32 @@ class File(FSNode):
             return ''
         return super().__getattr__(name)
     
-    def __update_content(self, data: str):
-        self._content = data
-        self.size = len(data)
-        super().modify()
-        
-    def write(self, data: str):
-        self.__update_content(data)
+    def write(self, content: str, overwrite: bool = True):
+        """
+        Writes content to the file. Updates size dynamically and modification time.
+        """
+        if overwrite:
+            self._content = content
+        else:
+            self._content += content
+        if self.parent:
+            self.parent.update_size(len(content) if not overwrite else len(content) - len(self._content))
+        self.modify()  # Update the modification time
     
     def append(self, data: str):
-        self.__update_content(self._content + data)
+        """
+        Appends data to the file. Updates modification time.
+        """
+        self.write(data, overwrite=False)
+        self.modify()  # Update the modification time
 
     def read(self) -> tuple[str, int]:
         """
         Reads and returns file content
 
         Returns:
-            tuple[str, int]: _description_
+            tuple[str, int]: The content and its size.
         """        
         self.rtime = datetime.now()
-        return self._content, len(self)
-    
-    
+        return self._content, len(self._content)
+

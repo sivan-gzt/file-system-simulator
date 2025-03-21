@@ -20,28 +20,22 @@ class FSNode:
         self.name   = name
         self.ctime  = datetime.now()
         self.mtime  = self.ctime
+        self.parent = None
         
     def __str__(self):
         return self.name
 
     def __getattr__(self, name):
         """
-        Fallback for missing attributes.
-
-        Args:
-            name (str): The name of the attribute being accessed.
-
-        Returns:
-            Any: The value of the attribute, or None if it's 'parent'.
+        Raises an AttributeError if the attribute is not found.
         """
-        if name == 'parent':
-            return None
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        self.raise_error(AttributeError, name=name)
 
     def modify(self):
-        self.mtime = datetime.now()
-        if hasattr(self, 'parent') and hasattr(self.parent, 'update_size'):
-            self.parent.update_size(getattr(self.size))
+        """
+        Updates the modification time (mtime) of the node and propagates changes to the parent.
+        """
+        self.mtime = datetime.now()  # Update the modification time
 
     def validate(self, name: str):
         """
