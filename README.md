@@ -1,4 +1,3 @@
-```
 # File System Simulator
 
 A Python-based file system simulator that supports basic operations like creating directories, creating and modifying files, reading file content, and more.
@@ -11,7 +10,6 @@ A Python-based file system simulator that supports basic operations like creatin
 - Delete files or directories (`del`)
 - List directory contents (`ls`)
 - Print the current working directory (`pwd`)
-- Prine file or directory size (`size`)
 
 ## Requirements
 - Python 3.8 or higher
