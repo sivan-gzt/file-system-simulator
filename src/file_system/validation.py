@@ -1,7 +1,7 @@
 import re
 
-from src.file_system.constants import MAX_LENGTH_NAME
-from .exceptions import InvalidNameError
+from file_system import MAX_LENGTH_NAME, InvalidNameError
+
 def validate_name(entity_type, name):
     """
     Validates a name for a filesystem entity (File or Directory).

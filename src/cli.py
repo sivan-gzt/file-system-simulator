@@ -1,8 +1,8 @@
 from argparse import ArgumentError, ArgumentParser
 from shlex import split as shlex_split
+from file_system.filesystem import FileSystem
 from file_system.exceptions import FileSystemError
 from file_system.constants import COLOR_RED, COLOR_RESET
-from file_system.filesystem import FileSystem
 
 def parse_arguments():
     parser = ArgumentParser(description="File System CLI")

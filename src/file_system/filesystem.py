@@ -1,9 +1,12 @@
-from src.file_system.constants import PATH_DELIMITER
-from src.file_system.exceptions import DuplicateNameError,  FileSystemError, NotADirectoryError
-from src.file_system.directory import Directory
-from src.file_system.file import File
-from src.file_system.path_resolver import PathResolver
-
+from file_system import (
+    PATH_DELIMITER,
+    DuplicateNameError,
+    FileSystemError,
+    NotADirectoryError,
+    Directory,
+    File,
+    PathResolver
+)
 
 class FileSystem:
     """

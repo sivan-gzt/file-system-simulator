@@ -1,6 +1,5 @@
 from datetime import datetime
-from src.file_system.constants import PREFIX_FILE
-from src.file_system.node import FSNode
+from file_system import PREFIX_FILE, FSNode
 
 class File(FSNode):
     

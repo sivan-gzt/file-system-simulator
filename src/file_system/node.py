@@ -1,7 +1,7 @@
 from datetime import datetime
-from src.file_system.linked_list.linked_list import LinkedList
-from src.file_system.constants import PATH_DELIMITER
-from .validation import validate_name
+# from src.file_system.linked_list.linked_list import LinkedList
+from file_system import PATH_DELIMITER, validate_name
+from file_system.linked_list import LinkedList
 
 class FSNode:
     """

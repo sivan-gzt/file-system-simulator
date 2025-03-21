@@ -1,7 +1,11 @@
-from src.file_system.constants import PATH_DELIMITER, ROOT
-from src.file_system.exceptions import NotFoundError, NotADirectoryError
-from src.file_system.node import FSNode
-from src.file_system.directory import Directory
+from file_system import (
+    PATH_DELIMITER,
+    ROOT,
+    NotFoundError,
+    NotADirectoryError,
+    FSNode,
+    Directory
+)
 
 class PathResolver:
     """
