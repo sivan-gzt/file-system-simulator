@@ -1,5 +1,18 @@
-from file_system import *
-from .linked_list import LinkedList
+from src.file_system.constants import (
+    PREFIX_DIRECTORY,
+    ROOT,
+    PATH_DELIMITER,
+    TREE_BRANCH,
+    TREE_LAST,
+    TREE_SPACE,
+    TREE_VERTICAL
+)
+from src.file_system.exceptions import (
+    DuplicateNameError,
+    NotFoundError
+)
+from src.file_system.node import FSNode
+from src.file_system.linked_list import LinkedList
 
 # from src.file_system.exceptions import DuplicateNameError
 # from src.file_system.constants import (
@@ -72,11 +85,11 @@ class Directory(FSNode):
             name (str): The name of the child to remove.
 
         Raises:
-            FileNotFoundError: If the child does not exist.
+            NotFoundError: If the child does not exist.
         """
         child = self.find_child(name)
         if not child:
-            raise FileNotFoundError(name=name, directory=self.name)
+            self.raise_error(NotFoundError, name=name, directory=self.name)
 
         self.children.remove(child)
         self.count -= 1

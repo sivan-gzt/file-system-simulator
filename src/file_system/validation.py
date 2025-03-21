@@ -1,6 +1,7 @@
 import re
 
-from file_system import MAX_LENGTH_NAME, InvalidNameError
+from src.file_system.constants import MAX_LENGTH_NAME
+from src.file_system.exceptions import InvalidNameError
 
 def validate_name(entity_type, name):
     """

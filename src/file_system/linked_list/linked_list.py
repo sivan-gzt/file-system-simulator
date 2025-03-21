@@ -1,7 +1,7 @@
 from __future__ import annotations
 from itertools import count
 
-from file_system import INDENT_STR
+from src.file_system.constants import INDENT_STR
 
 class _LinkedListNode:
     __ids = count(1)
