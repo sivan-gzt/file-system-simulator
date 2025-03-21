@@ -19,5 +19,5 @@ A Python-based file system simulator that supports basic operations like creatin
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/sivan.gzt/file-system-simulator.git
+   git clone https://github.com/sivan-gzt/file-system-simulator/
    cd file-system-simulator
